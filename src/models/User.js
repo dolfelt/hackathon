@@ -8,26 +8,29 @@ class User extends Record({
   email: "",
 }) {
 
-  static populateOn(list, users, id) {
-    return mapValues(list, (item, key) => {
-      if (!item) return item;
-      const isKey = id === 'key'
-      const user = users[isKey ? key : item[id]];
+  static find(users, id) {
+    const user = (users||{})[id];
+    if (user) {
+      return new User({...user, id});
+    }
+    return new User({id});
+  }
+
+  static populateList(list, users, key) {
+    const populate = (item, id) => {
+      const isKey = key === 'key';
+      const lookup = isKey ? id : item[key];
 
       if (isKey) {
-        if (user) {
-          return new User(user);
-        } else {
-          return new User({name: item});
-        }
+        return this.find(users, lookup);
       }
 
-      if (user) {
-        item[id] = user;
-      } else {
-        item[id] = {}
-      }
+      item[key] = this.find(users, lookup);
       return item;
+    }
+    return mapValues(list, (item, id) => {
+      if (!item) return item;
+      return populate(item, id);
     })
   }
 }

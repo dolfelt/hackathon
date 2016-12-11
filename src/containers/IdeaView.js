@@ -67,12 +67,14 @@ class IdeaView extends Component {
     }
 
     this.setState({saving: true});
-    let idea = this.state.idea;
+    let {idea} = this.state;
+    let {firebase, auth} = this.props;
     if (!idea.id) {
       idea = idea.set('id', uuid())
-        .set('user', this.props.auth.uid);
+        .set('user', auth.uid);
     }
-    this.props.firebase.set(`/ideas/${idea.id}`, idea.toJSON(), (err) => {
+    firebase.set(`/ideas/${idea.id}`, idea.toJSON(), (err) => {
+      this.setMember(idea.id, auth, true);
       this.setState({saving: false, editing: false});
     })
   }
@@ -89,8 +91,16 @@ class IdeaView extends Component {
 
   onJoin = () => {
     let {idea, auth, members} = this.props;
-    const path = `/members/${idea.id}/${auth.uid}`;
     if (!members || !members[auth.uid]) {
+      this.setMember(idea.id, auth, true);
+    } else {
+      this.setMember(idea.id, auth, false);
+    }
+  }
+
+  setMember(ideaId, auth, add = true) {
+    const path = `/members/${ideaId}/${auth.uid}`;
+    if (add) {
       this.props.firebase.set(path, auth.displayName);
     } else {
       this.props.firebase.remove(path);
@@ -139,6 +149,8 @@ class IdeaView extends Component {
       return (<Redirect to="/" />);
     }
 
+    const isMember = !!members[auth.uid];
+
     return (
       <div>
         <IdeaItem
@@ -153,6 +165,7 @@ class IdeaView extends Component {
         <CommentList
           comments={comments}
           onComment={this.onComment}
+          readOnly={!isMember}
         />
       </div>
     );
@@ -172,12 +185,13 @@ export default connect(
     const memberList = dataToJS(firebase, `/members/${params.id}`);
     const commentList = dataToJS(firebase, `/comments/${params.id}`);
     const users = dataToJS(firebase, `/users`);
-    const members = users && memberList ? User.populateOn(memberList, users, 'key') : {};
-    const comments = users && commentList ? User.populateOn(commentList, users, 'user') : {};
+    const members = users && memberList ? User.populateList(memberList, users, 'key') : {};
+    const comments = users && commentList ? User.populateList(commentList, users, 'user') : {};
+    const idea = dataToJS(firebase, `/ideas/${params.id}`) || {};
 
     return {
       auth: pathToJS(firebase, 'auth'),
-      idea: dataToJS(firebase, `/ideas/${params.id}`),
+      idea,
       votes: dataToJS(firebase, `/votes/${params.id}`),
       comments: sortBy(comments, ['timestamp']),
       members,

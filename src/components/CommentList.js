@@ -12,6 +12,7 @@ import distanceInWordsToNow from 'date-fns/distance_in_words_to_now'
 class CommentList extends Component{
   static propTypes = {
     comments: PropTypes.array,
+    readOnly: PropTypes.bool,
     onComment: PropTypes.func,
   }
 
@@ -45,19 +46,21 @@ class CommentList extends Component{
             );
           })}
         </ListGroup>
-        <CardBlock>
-          <Form onSubmit={this.onComment}>
-            <InputGroup>
-              <Input
-                value={this.state.comment}
-                onChange={(event) => { this.setState({comment: event.target.value}); }}
-              />
-              <InputGroupButton>
-                <Button color="primary">Send</Button>
-              </InputGroupButton>
-            </InputGroup>
-          </Form>
-        </CardBlock>
+        {this.props.readOnly ? null : (
+          <CardBlock>
+            <Form onSubmit={this.onComment}>
+              <InputGroup>
+                <Input
+                  value={this.state.comment}
+                  onChange={(event) => { this.setState({comment: event.target.value}); }}
+                />
+                <InputGroupButton>
+                  <Button color="primary">Send</Button>
+                </InputGroupButton>
+              </InputGroup>
+            </Form>
+          </CardBlock>
+        )}
       </Card>
     );
   }

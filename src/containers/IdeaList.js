@@ -38,6 +38,7 @@ export const Ideas = ({ideas}) => {
           </h2>
           <Row>
             {ideas.map((idea) => {
+              if (!idea) return null;
               return (
                 <Col xs={12} md={6} lg={4} key={idea.id} className="mb-1">
                   <IdeaCard {...idea.toJSON()} />
@@ -55,7 +56,7 @@ export default connect(
   ({firebase}) => {
     const users = dataToJS(firebase, '/users', {});
     const votes = dataToJS(firebase, '/votes', {});
-    const ideas = User.populateOn(dataToJS(firebase, '/ideas', {}), users, 'user');
+    const ideas = User.populateList(dataToJS(firebase, '/ideas', {}), users, 'user');
     return {
       ideas: orderBy(map(ideas, idea => {
         if (!idea) return idea;

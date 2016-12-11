@@ -21,11 +21,13 @@ const IdeaItem = ({
 }) => {
   const voted = !!votes[auth.uid];
   const isMember = !!members[auth.uid];
+  const isOwner = idea.user === auth.uid;
+  console.log(idea.user, auth.uid);
   return (
     <Row>
       <Col xs={12}>
         <h2>
-          {auth.uid === idea.user ?
+          {isOwner ?
             <Button onClick={onEdit} className="float-xs-right ml-1">Edit Idea</Button> : null
           }
           <Button className="float-xs-right ml-1" outline={!voted} color="primary" onClick={onVote}>
@@ -50,15 +52,17 @@ const IdeaItem = ({
           <Col md={4}>
             <Card>
               <CardHeader>
-                <Button
-                  onClick={onJoin}
-                  className="float-xs-right ml-1"
-                  size="sm"
-                  color={isMember ? 'danger' : 'success'}
-                  outline
-                >
-                  {isMember ? 'Leave' : 'Join'}
-                </Button>
+                {isOwner ? null : (
+                  <Button
+                    onClick={onJoin}
+                    className="float-xs-right ml-1"
+                    size="sm"
+                    color={isMember ? 'danger' : 'success'}
+                    outline
+                  >
+                    {isMember ? 'Leave' : 'Join'}
+                  </Button>
+                )}
                 Members
               </CardHeader>
               <CardBlock>
