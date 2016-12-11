@@ -1,0 +1,62 @@
+{
+  "rules": {
+    ".read": "auth.token.email.endsWith('@wheniwork.com') || auth.token.email === 'dolfelt@gmail.com'",
+    "ideas": {
+      "$idea_id": {
+      	".write": "!data.exists() || data.child('user').val() === auth.uid",
+        ".validate": "newData.hasChildren(['title', 'description', 'user'])"
+      }
+    },
+    "users": {
+      "$user_id": {
+      	".write": "auth.uid === $user_id",
+        ".validate": "newData.hasChildren(['name', 'email', 'avatar'])",
+        "email": {
+          ".validate": "newData.isString() && (newData.val().endsWith('@wheniwork.com') || newData.val() === 'dolfelt@gmail.com')"
+        }
+      }
+    },
+    "members": {
+      "$idea_id": {
+        // any member can read the list of member names
+        ".read": "data.child(auth.uid).exists()",
+        ".write": "root.child('ideas/'+$idea_id).child('user').val() === auth.uid",
+        // idea must already exist to add a member
+        ".validate": "root.child('ideas/'+$idea_id).exists()",
+        "$user_id": {
+          ".write": "auth.uid === $user_id",
+         	".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 20"
+        }
+      }
+    },
+    "votes": {
+      "$idea_id": {
+        ".read": "data.child(auth.uid).exists()",
+        ".write": "root.child('ideas/'+$idea_id).child('user').val() === auth.uid",
+        ".validate": "root.child('ideas/'+$idea_id).exists()",
+        "$user_id": {
+          ".write": "auth.uid === $user_id",
+         	".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 20"
+        }
+      }
+    },
+    "comments": {
+      "$idea_id": {
+        ".write": "root.child('ideas/'+$idea_id).child('user').val() === auth.uid",
+        ".validate": "root.child('ideas/'+$idea_id).exists()",
+        "$comment_id": {
+          // any member of the idea can comment
+          ".write": "(root.child('members/'+$idea_id+'/'+auth.uid).exists() && !data.exists())",
+        	".validate": "newData.hasChildren(['user', 'message', 'timestamp'])",
+
+          // the message must be written by logged in user
+          "user": {
+             ".validate": "newData.val() === auth.uid"
+          },
+          "message": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 250" },
+          "timestamp": { ".validate": "newData.val() <= now" }
+        }
+      }
+    }
+  }
+}

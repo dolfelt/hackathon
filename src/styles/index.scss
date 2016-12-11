@@ -1,0 +1,12 @@
+$enable-flex: true;
+@import "bootstrap/scss/bootstrap";
+
+@import "components";
+@import "theme";
+
+.app-content {
+  margin: 1em auto;
+  padding: 0 2em;
+  color: #333;
+  max-width: 1200px;
+}

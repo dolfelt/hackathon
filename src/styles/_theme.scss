@@ -1,0 +1,22 @@
+body {
+  background-color: #edeff0;
+}
+.navbar {
+  background-color: white;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.navbar .nav-link {
+  line-height: 3rem;
+  padding: 0.425rem 1rem;
+}
+.nav-link.active {
+  background: #51a33d;
+  color: white !important;
+}
+.navbar .navbar-brand {
+  line-height: 3rem;
+  padding-top: 0.425rem;
+}
